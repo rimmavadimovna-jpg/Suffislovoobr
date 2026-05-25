@@ -1,0 +1,1316 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Тренажёр · Суффиксы и словообразование</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,700;9..144,900&family=Spectral:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1814;
+    --paper: #f3ede1;
+    --paper-2: #ebe2cf;
+    --rule: #2a2520;
+    --accent: #c0392b;
+    --accent-2: #d4a017;
+    --correct: #2d6a4f;
+    --wrong: #9b2226;
+    --muted: #6b6258;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Spectral', Georgia, serif;
+    font-size: 17px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    background-image:
+      radial-gradient(circle at 20% 10%, rgba(192,57,43,0.04), transparent 40%),
+      radial-gradient(circle at 80% 90%, rgba(212,160,23,0.05), transparent 40%),
+      repeating-linear-gradient(0deg, transparent 0 31px, rgba(42,37,32,0.04) 31px 32px);
+    min-height: 100vh;
+    padding: 40px 20px 80px;
+  }
+  .container { max-width: 760px; margin: 0 auto; }
+
+  /* Cover */
+  .cover {
+    border: 2px solid var(--rule);
+    background: var(--paper-2);
+    padding: 36px 32px 28px;
+    position: relative;
+    margin-bottom: 32px;
+    box-shadow: 6px 6px 0 var(--rule);
+  }
+  .cover::before {
+    content: ""; position: absolute; inset: 6px;
+    border: 1px solid var(--rule); pointer-events: none;
+  }
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.28em;
+    text-transform: uppercase; color: var(--accent);
+    margin-bottom: 14px;
+  }
+  h1 {
+    font-family: 'Fraunces', serif; font-weight: 900;
+    font-size: clamp(36px, 6vw, 52px); line-height: 0.95;
+    letter-spacing: -0.02em;
+    font-variation-settings: "opsz" 144;
+    margin-bottom: 18px;
+  }
+  h1 em { font-style: italic; font-weight: 400; color: var(--accent); }
+  .cover-meta {
+    display: flex; flex-wrap: wrap; gap: 24px;
+    border-top: 1px solid var(--rule);
+    padding-top: 16px; margin-top: 18px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--muted);
+  }
+  .cover-meta strong { color: var(--ink); }
+  .cover-note {
+    margin-top: 14px;
+    font-size: 14px; font-style: italic; color: var(--muted);
+  }
+
+  /* Name block (top) */
+  .name-block {
+    background: var(--paper-2);
+    border: 1.5px solid var(--rule);
+    padding: 20px 24px;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    box-shadow: 4px 4px 0 var(--rule);
+  }
+  .name-block-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .name-block input {
+    flex: 1;
+    min-width: 200px;
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    padding: 8px 14px;
+    background: var(--paper);
+    border: 1.5px solid var(--rule);
+    color: var(--ink);
+  }
+  .name-block input:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .name-block input.empty-warn {
+    border-color: var(--accent);
+    background: rgba(192,57,43,0.05);
+  }
+
+  /* Progress */
+  .progress-wrap {
+    position: sticky; top: 10px; z-index: 50;
+    background: var(--paper);
+    border: 1.5px solid var(--rule);
+    padding: 10px 16px; margin-bottom: 28px;
+    display: flex; align-items: center; gap: 14px;
+    box-shadow: 3px 3px 0 var(--rule);
+  }
+  .progress-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.15em;
+    text-transform: uppercase; white-space: nowrap;
+  }
+  .progress-bar {
+    flex: 1; height: 8px;
+    background: var(--paper-2); border: 1px solid var(--rule);
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; background: var(--accent);
+    width: 0%; transition: width 0.4s ease;
+  }
+  .progress-score {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; font-weight: 600; white-space: nowrap;
+  }
+
+  /* Block headers */
+  .block-header {
+    margin: 40px 0 18px;
+    border-top: 2px solid var(--rule); padding-top: 16px;
+    display: flex; align-items: baseline; gap: 12px;
+  }
+  .block-header .num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px; font-weight: 600;
+    color: var(--accent); letter-spacing: 0.1em;
+  }
+  .block-header .title {
+    font-family: 'Fraunces', serif; font-style: italic;
+    font-weight: 500; font-size: 22px;
+  }
+
+  /* Task card */
+  .task {
+    background: var(--paper-2);
+    border: 1.5px solid var(--rule);
+    padding: 24px 26px 22px; margin-bottom: 22px;
+    position: relative;
+    box-shadow: 4px 4px 0 var(--rule);
+  }
+  .task-head {
+    display: flex; align-items: baseline; gap: 12px;
+    margin-bottom: 14px;
+    border-bottom: 1px dashed var(--rule);
+    padding-bottom: 12px;
+  }
+  .task-num {
+    font-family: 'Fraunces', serif; font-weight: 900;
+    font-size: 28px; line-height: 1; color: var(--accent);
+  }
+  .task-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.15em;
+    text-transform: uppercase; color: var(--muted);
+  }
+  .task-prompt { font-size: 17px; margin-bottom: 16px; }
+  .task-prompt b {
+    background: linear-gradient(transparent 60%, rgba(212,160,23,0.4) 60%);
+    padding: 0 2px; font-weight: 500;
+  }
+
+  /* Options */
+  .options { display: flex; flex-direction: column; gap: 8px; }
+  .opt {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 10px 14px; border: 1px solid transparent;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    user-select: none;
+  }
+  .opt:hover { background: rgba(192,57,43,0.06); }
+  .opt input { margin-top: 4px; cursor: pointer; accent-color: var(--accent); }
+  .opt-label { flex: 1; }
+  .opt.locked { cursor: default; pointer-events: none; }
+  .opt.correct-shown {
+    background: rgba(45,106,79,0.10);
+    border-color: var(--correct);
+  }
+  .opt.wrong-shown {
+    background: rgba(155,34,38,0.08);
+    border-color: var(--wrong);
+    text-decoration: line-through;
+    text-decoration-color: var(--wrong);
+  }
+  .opt.correct-shown .opt-mark { color: var(--correct); font-weight: 700; }
+  .opt.wrong-shown .opt-mark { color: var(--wrong); font-weight: 700; }
+  .opt-mark { display: none; font-family: 'JetBrains Mono', monospace; font-size: 12px; margin-left: 8px; }
+  .opt.correct-shown .opt-mark, .opt.wrong-shown .opt-mark { display: inline; }
+
+  /* Fill cells */
+  .cells { display: grid; gap: 10px; margin-bottom: 14px; }
+  .cell {
+    display: flex; align-items: center; gap: 12px;
+    padding: 8px 12px; background: var(--paper);
+    border: 1px solid var(--rule);
+  }
+  .cell-word { flex: 1; font-size: 16px; }
+  .cell-word b {
+    background: rgba(212,160,23,0.35);
+    padding: 0 4px; font-weight: 500;
+  }
+  .cell select {
+    font-family: 'Fraunces', serif; font-size: 18px; font-weight: 700;
+    padding: 4px 10px;
+    background: var(--paper-2);
+    border: 1.5px solid var(--rule);
+    cursor: pointer; color: var(--ink);
+  }
+  .cell select:disabled { opacity: 1; }
+  .cell.correct-shown { border-color: var(--correct); border-width: 2px; }
+  .cell.wrong-shown { border-color: var(--wrong); border-width: 2px; }
+  .cell-correct-answer {
+    font-family: 'Fraunces', serif; font-style: italic;
+    font-size: 14px; color: var(--correct);
+    display: none;
+  }
+  .cell.wrong-shown .cell-correct-answer { display: inline; }
+
+  /* Chain (drag-drop order) */
+  .chain-pool {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin-bottom: 14px; padding: 12px;
+    border: 1px solid var(--rule); background: var(--paper);
+    min-height: 60px;
+  }
+  .chain-slots {
+    display: flex; flex-direction: column; gap: 10px;
+    margin-bottom: 14px;
+  }
+  .chain-slot {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px; background: var(--paper);
+    border: 2px dashed var(--rule);
+    min-height: 50px;
+  }
+  .chain-slot-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; font-weight: 700;
+    color: var(--accent); min-width: 24px;
+  }
+  .chain-slot-content { flex: 1; }
+  .chain-slot.filled { border-style: solid; }
+  .chain-slot.drag-over { background: rgba(212,160,23,0.15); }
+  .chain-slot.correct-shown { border-color: var(--correct); background: rgba(45,106,79,0.07); }
+  .chain-slot.wrong-shown { border-color: var(--wrong); background: rgba(155,34,38,0.05); }
+  .chain-slot .correct-hint {
+    font-family: 'Fraunces', serif; font-style: italic;
+    font-size: 13px; color: var(--correct); margin-left: auto;
+  }
+  .chip {
+    display: inline-block;
+    padding: 6px 14px;
+    background: var(--paper-2);
+    border: 1.5px solid var(--rule);
+    font-family: 'Fraunces', serif; font-weight: 500;
+    font-size: 16px;
+    cursor: grab; user-select: none;
+    transition: transform 0.1s, box-shadow 0.1s;
+  }
+  .chip:hover { transform: translateY(-2px); box-shadow: 2px 2px 0 var(--rule); }
+  .chip.dragging { opacity: 0.4; }
+  .chip.locked { cursor: default; }
+  .chip-arrow {
+    color: var(--muted); margin: 0 4px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* Sub-question (after chain) */
+  .sub-q {
+    margin-top: 16px; padding-top: 14px;
+    border-top: 1px dashed var(--rule);
+  }
+  .sub-q-label {
+    font-size: 16px; margin-bottom: 10px;
+  }
+  .sub-q-label b {
+    background: linear-gradient(transparent 60%, rgba(212,160,23,0.4) 60%);
+    padding: 0 2px;
+  }
+
+  /* Group (find odd one) */
+  .group-options {
+    display: flex; flex-direction: column; gap: 8px;
+  }
+
+  /* Final */
+  .final {
+    margin-top: 40px;
+    border: 2.5px solid var(--rule);
+    background: var(--paper-2);
+    padding: 36px 32px;
+    text-align: center;
+    box-shadow: 6px 6px 0 var(--rule);
+    display: none;
+  }
+  .final.shown { display: block; }
+  .final-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.25em;
+    text-transform: uppercase; color: var(--accent);
+    margin-bottom: 12px;
+  }
+  .final h2 {
+    font-family: 'Fraunces', serif; font-weight: 900;
+    font-size: 44px; line-height: 1;
+    margin-bottom: 14px; letter-spacing: -0.01em;
+  }
+  .final-score {
+    font-family: 'Fraunces', serif; font-size: 80px; font-weight: 900;
+    color: var(--accent); line-height: 1;
+    margin: 18px 0 8px;
+  }
+  .final-score .of { font-size: 32px; color: var(--muted); font-weight: 400; }
+  .final-grade {
+    font-family: 'Fraunces', serif; font-style: italic;
+    font-size: 22px; margin-bottom: 24px;
+  }
+  .final-name { margin: 26px 0 18px; }
+  .final-name label {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.15em;
+    text-transform: uppercase; margin-bottom: 8px;
+    color: var(--muted);
+  }
+  .final-name input {
+    font-family: 'Fraunces', serif; font-size: 20px;
+    padding: 10px 16px; width: 100%; max-width: 360px;
+    background: var(--paper);
+    border: 1.5px solid var(--rule);
+    color: var(--ink); text-align: center;
+  }
+  .final-name input:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .send-btn, .check-final-btn {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px; letter-spacing: 0.15em;
+    text-transform: uppercase; font-weight: 700;
+    padding: 16px 32px;
+    background: var(--accent); color: var(--paper);
+    border: none; cursor: pointer; text-decoration: none;
+    transition: background 0.15s, transform 0.05s;
+  }
+  .send-btn:hover, .check-final-btn:hover { background: var(--ink); }
+  .send-btn:active, .check-final-btn:active { transform: translateY(1px); }
+  .send-btn:disabled, .check-final-btn:disabled { background: var(--muted); cursor: not-allowed; }
+
+  /* Big check button */
+  .big-check {
+    text-align: center;
+    margin: 40px 0 20px;
+  }
+  .check-final-btn {
+    font-size: 15px;
+    padding: 20px 44px;
+  }
+  .check-warning {
+    margin-top: 12px;
+    font-size: 14px; font-style: italic; color: var(--muted);
+  }
+  .check-warning.error { color: var(--wrong); }
+
+  .send-hint {
+    margin-top: 14px;
+    font-size: 13px; color: var(--muted);
+    font-style: italic;
+  }
+  .review-eyebrow {
+    margin-top: 32px;
+    border-top: 2px solid var(--rule);
+    padding-top: 24px;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--muted);
+  }
+
+  @media (max-width: 600px) {
+    body { padding: 20px 12px 60px; }
+    .cover { padding: 24px 20px 20px; }
+    .task { padding: 18px 18px 16px; }
+    .final h2 { font-size: 32px; }
+    .final-score { font-size: 64px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header class="cover">
+    <div class="eyebrow">Тренажёр · Русский язык</div>
+    <h1>Суффиксы <em>&</em> словообразование</h1>
+    <div class="cover-meta">
+      <span><strong>15</strong> заданий</span>
+      <span><strong>2</strong> блока</span>
+      <span><strong>≈</strong> 25 минут</span>
+    </div>
+    <div class="cover-note">Отвечай на все задания, в конце нажми «Проверить и отправить» — результат уйдёт учителю.</div>
+  </header>
+
+  <div class="name-block">
+    <label class="name-block-label" for="studentNameTop">Имя и фамилия</label>
+    <input type="text" id="studentNameTop" placeholder="Например, Иван Иванов" autocomplete="off">
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-label">Прогресс</div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-score" id="progressScore">0 / 15</div>
+  </div>
+
+  <div id="tasksRoot"></div>
+
+  <div class="big-check" id="bigCheckWrap">
+    <button class="check-final-btn" id="checkFinalBtn">Проверить и отправить →</button>
+    <div class="check-warning" id="checkWarning">Заполни все задания, прежде чем отправлять.</div>
+  </div>
+
+  <div class="final" id="finalCard">
+    <div class="final-eyebrow">Тест проверен</div>
+    <h2>Результат</h2>
+    <div class="final-score"><span id="finalNum">0</span><span class="of"> / 15</span></div>
+    <div class="final-grade" id="finalGrade"></div>
+
+    <div class="final-name">
+      <label for="studentName">Подпишись, чтобы учитель тебя узнал</label>
+      <input type="text" id="studentName" placeholder="Имя и фамилия" autocomplete="off">
+    </div>
+
+    <button class="send-btn" id="sendBtn">Отправить учителю →</button>
+    <div class="send-hint">Результаты отправятся в Telegram автоматически.</div>
+
+    <div class="review-eyebrow">Разбор ниже — посмотри, где ошибки</div>
+  </div>
+
+</div>
+
+<script>
+/* ===================== ЗАДАНИЯ ===================== */
+
+const TASKS = [
+  // ===== БЛОК А. СУФФИКСЫ =====
+
+  // 1
+  {
+    block: "Блок А · Правописание суффиксов",
+    type: "multi",
+    title: "В каких словах пишется буква <b>Ч</b> (суффикс -ЧИК-)?",
+    options: [
+      { id: "А", text: "буфет__ик", correct: true },
+      { id: "Б", text: "развед__ик", correct: true },
+      { id: "В", text: "пиль__ик", correct: false },
+      { id: "Г", text: "объезд__ик", correct: true },
+      { id: "Д", text: "барабан__ик", correct: false },
+      { id: "Е", text: "смаз__ик", correct: true },
+    ],
+    explanation: "Верные: А, Б, Г, Е. Суффикс -ЧИК- пишется после Д, Т, З, С, Ж: буфетЧИК (Т), разведЧИК (Д), объездЧИК (Д), смазЧИК (З). После остальных согласных — -ЩИК-: пильЩИК (Л), барабанЩИК (Н)."
+  },
+
+  // 2
+  {
+    block: "Блок А · Правописание суффиксов",
+    type: "multi",
+    title: "В каких словах пишется буква <b>И</b>?",
+    options: [
+      { id: "А", text: "дожд__к", correct: true },
+      { id: "Б", text: "горош__к", correct: false },
+      { id: "В", text: "карандаш__к", correct: true },
+      { id: "Г", text: "кусоч__к", correct: false },
+      { id: "Д", text: "мяч__к", correct: true },
+      { id: "Е", text: "огонёч__к", correct: false },
+    ],
+    explanation: "Верные: А, В, Д. Суффикс -ИК- пишется, если при склонении гласная НЕ выпадает: дождИК (дождика), карандашИК (карандашика), мячИК (мячика). Суффикс -ЕК- — если гласная выпадает: горошЕК (горошка), кусочЕК (кусочка), огонёчЕК (огонёчка)."
+  },
+
+  // 3
+  {
+    block: "Блок А · Правописание суффиксов",
+    type: "multi",
+    title: "В каких строках во <b>ВСЕХ</b> словах пропущена одна и та же буква?",
+    options: [
+      { id: "1", text: "затейл__вый, заботл__вый, доверч__вый", correct: true },
+      { id: "2", text: "кра__вой, милост__вый, ноздр__ватый", correct: false },
+      { id: "3", text: "солом__нка, виш__нка, нищ__нка", correct: false },
+      { id: "4", text: "ключ__к, замоч__к, песоч__к", correct: false },
+    ],
+    explanation: "Верный ответ: 1. В строке 1 — везде И (суффиксы -ЛИВ-/-ЧИВ- всегда с И). В строке 2 — Е/И/Е (краЕвой, ноздрЕватый — безударный -ЕВ-, но «милостИвый» — исключение, пишется через И). В строке 3 — И/Е/Е (соломИНКа от «солома» через -ИНА- → -ИНК-; вишЕНКа, нищЕНКа — -ЕНК-). В строке 4 — И/Е/Е (ключИК — не выпадает; замочЕК, песочЕК — выпадает)."
+  },
+
+  // 4
+  {
+    block: "Блок А · Правописание суффиксов",
+    type: "multi",
+    title: "В каких строках во <b>ВСЕХ</b> словах пропущена одна и та же буква?",
+    options: [
+      { id: "1", text: "красав__ца, умн__ца, метел__ца", correct: true },
+      { id: "2", text: "гварде__ц, многобор__ц, кормил__ц", correct: true },
+      { id: "3", text: "плать__це, кресл__це, письм__цо", correct: false },
+      { id: "4", text: "горош__к, замоч__к, ореш__к", correct: true },
+    ],
+    explanation: "Верные: 1, 2, 4. В строке 1 — везде И (ж.р. → -ИЦ-). В строке 2 — везде Е (м.р. → -ЕЦ-). В строке 3 — И/И/Е (в ср.р. зависит от ударения: до суффикса — И, после — Е). В строке 4 — везде Е (-ЕК-, так как при склонении гласная выпадает: горошка, замочка, орешка)."
+  },
+
+  // 5
+  {
+    block: "Блок А · Правописание суффиксов",
+    type: "multi",
+    title: "В каких словах пишется буква <b>О</b>?",
+    options: [
+      { id: "А", text: "рубаш__нка", correct: true },
+      { id: "Б", text: "ноч__вка", correct: false },
+      { id: "В", text: "холщ__вый", correct: true },
+      { id: "Г", text: "размеж__вка", correct: false },
+      { id: "Д", text: "собач__нка", correct: true },
+      { id: "Е", text: "бельч__нок", correct: true },
+    ],
+    explanation: "Верные: А, В, Д, Е. В именных частях речи (существительных, прилагательных) под ударением после шипящих пишется О: рубашОНка, холщОВый, собачОНка, бельчОНок. В отглагольных существительных под ударением — Ё: ночЁвка (от ночевать), размежЁвка (от размежевать)."
+  },
+
+  // 6
+  {
+    block: "Блок А · Правописание суффиксов",
+    type: "multi",
+    title: "В каких словах пишется буква <b>Е</b>?",
+    options: [
+      { id: "А", text: "ножн__чки", correct: false },
+      { id: "Б", text: "Сон__чка", correct: true },
+      { id: "В", text: "врем__чко", correct: true },
+      { id: "Г", text: "лестн__чка", correct: false },
+      { id: "Д", text: "пугов__чка", correct: false },
+      { id: "Е", text: "сем__чко", correct: true },
+    ],
+    explanation: "Верные: Б, В, Е. Суффикс -ИЧК- пишется в словах, образованных от существительных на -ИЦ-: ножнИЧКи (от ножниц-), лестнИЧКа (от лестниц-), пуговИЧКа (от пуговиц-). В остальных случаях — -ЕЧК-: СонЕЧКа (имя собств.), времЕЧКо, семЕЧКо."
+  },
+
+  // 7 (вставь Н/НН)
+  {
+    block: "Блок А · Правописание суффиксов",
+    type: "fill",
+    title: "Вставь Н или НН в каждое слово.",
+    options: ["Н", "НН"],
+    cells: [
+      { word: "ю__ый", correct: "Н" },
+      { word: "оловя__ый", correct: "НН" },
+      { word: "глиня__ый", correct: "Н" },
+      { word: "ба__ый", correct: "НН" },
+      { word: "безветре__ый", correct: "НН" },
+      { word: "звери__ый", correct: "Н" },
+      { word: "кожа__ый", correct: "Н" },
+      { word: "шерстя__ой", correct: "Н" },
+      { word: "сенсацио__ый", correct: "НН" },
+      { word: "качестве__ый", correct: "НН" },
+    ],
+    explanation: "НН пишется: в исключениях (стеклянный, оловянный, деревянный), в суффиксах -ОНН-, -ЕНН- (сенсационный, качественный), на стыке морфем (банный = баня + н), в полных прилагательных с приставкой (безветренный). Н пишется: в -АН-/-ЯН-/-ИН- (кожаный, шерстяной, глиняный, звериный), а также в исключениях «юный» и «ветреный»."
+  },
+
+  // ===== БЛОК Б. СЛОВООБРАЗОВАНИЕ =====
+
+  // 7 (chain) — приобретатель (бывшее 9)
+  {
+    block: "Блок Б · Словообразование",
+    type: "chain",
+    title: "Расставь слова в правильном порядке словообразовательной цепочки — от самого простого к самому сложному.",
+    pool: ["обретать", "приобретатель", "приобретать"],
+    correctOrder: ["обретать", "приобретать", "приобретатель"],
+    subQuestion: {
+      title: "Каким способом образовано слово <b>ПРИОБРЕТАТЕЛЬ</b>?",
+      options: [
+        { id: "1", text: "суффиксальный", correct: true },
+        { id: "2", text: "приставочный", correct: false },
+        { id: "3", text: "приставочно-суффиксальный", correct: false },
+        { id: "4", text: "бессуффиксный", correct: false },
+        { id: "5", text: "сложение", correct: false },
+      ]
+    },
+    explanation: "Цепочка: обретать → приобретать (приставочный, добавляется ПРИ-) → приобретатель (суффиксальный, добавляется -ТЕЛЬ). Слово «приобретатель» образовано суффиксальным способом."
+  },
+
+  // 10 (chain) — бессуффиксный
+  {
+    block: "Блок Б · Словообразование",
+    type: "chain",
+    title: "Расставь слова в правильном порядке цепочки.",
+    pool: ["рассчитать", "расчётливый", "расчёт", "считать"],
+    correctOrder: ["считать", "рассчитать", "расчёт", "расчётливый"],
+    subQuestion: {
+      title: "Каким способом образовано слово <b>РАСЧЁТ</b>?",
+      options: [
+        { id: "1", text: "суффиксальный", correct: false },
+        { id: "2", text: "приставочный", correct: false },
+        { id: "3", text: "приставочно-суффиксальный", correct: false },
+        { id: "4", text: "бессуффиксный", correct: true },
+        { id: "5", text: "сложение", correct: false },
+      ]
+    },
+    explanation: "Цепочка: считать → рассчитать (приставочный) → расчёт (бессуффиксный) → расчётливый (суффиксальный). Слово «расчёт» образовано бессуффиксным способом: от глагола «рассчитать» отбрасывается -АТЬ, остаётся основа без суффикса."
+  },
+
+  // 11 (chain) — наречие на -О от прилагательного
+  {
+    block: "Блок Б · Словообразование",
+    type: "chain",
+    title: "Расставь слова в правильном порядке цепочки.",
+    pool: ["несимпатично", "симпатия", "несимпатичный", "симпатичный"],
+    correctOrder: ["симпатия", "симпатичный", "несимпатичный", "несимпатично"],
+    subQuestion: {
+      title: "Каким способом образовано слово <b>НЕСИМПАТИЧНО</b>?",
+      options: [
+        { id: "1", text: "суффиксальный", correct: true },
+        { id: "2", text: "приставочный", correct: false },
+        { id: "3", text: "приставочно-суффиксальный", correct: false },
+        { id: "4", text: "бессуффиксный", correct: false },
+        { id: "5", text: "сложение", correct: false },
+      ]
+    },
+    explanation: "Цепочка: симпатия → симпатичный (суфф.) → несимпатичный (приставочный) → несимпатично (суффиксальный). Наречие «несимпатично» образовано от прилагательного «несимпатичный» с помощью суффикса -О. Важно: производящее слово — прилагательное, а не существительное."
+  },
+
+  // 12 (chain) — суффикс -ОСТЬ
+  {
+    block: "Блок Б · Словообразование",
+    type: "chain",
+    title: "Расставь слова в правильном порядке цепочки.",
+    pool: ["безрадостный", "радость", "рад", "безрадостность"],
+    correctOrder: ["рад", "радость", "безрадостный", "безрадостность"],
+    subQuestion: {
+      title: "Каким способом образовано слово <b>БЕЗРАДОСТНОСТЬ</b>?",
+      options: [
+        { id: "1", text: "суффиксальный", correct: true },
+        { id: "2", text: "приставочный", correct: false },
+        { id: "3", text: "приставочно-суффиксальный", correct: false },
+        { id: "4", text: "бессуффиксный", correct: false },
+        { id: "5", text: "сложение", correct: false },
+      ]
+    },
+    explanation: "Цепочка: рад → радость (суфф.) → безрадостный (прист.-суфф. от «радость») → безрадостность (суффиксальный, -ОСТЬ от прилагательного «безрадостный»). Слово «безрадостность» образовано суффиксальным способом: суффикс -ОСТЬ присоединяется к основе прилагательного."
+  },
+
+  // 13 — определи способ (сложение)
+  {
+    block: "Блок Б · Словообразование",
+    type: "single",
+    title: "Каким способом образовано слово <b>ЛЕДОКОЛ</b>?",
+    options: [
+      { id: "1", text: "суффиксальный", correct: false },
+      { id: "2", text: "приставочный", correct: false },
+      { id: "3", text: "приставочно-суффиксальный", correct: false },
+      { id: "4", text: "бессуффиксный", correct: false },
+      { id: "5", text: "сложение основ", correct: true },
+    ],
+    explanation: "Слово «ледокол» образовано сложением основ: лёд + колоть, соединительная гласная О. Соединяются две производящие основы — это и есть сложение."
+  },
+
+  // 14 — определи способ (приставочно-суффиксальный)
+  {
+    block: "Блок Б · Словообразование",
+    type: "single",
+    title: "Каким способом образовано слово <b>БЕЗДОРОЖЬЕ</b>?",
+    options: [
+      { id: "1", text: "суффиксальный", correct: false },
+      { id: "2", text: "приставочный", correct: false },
+      { id: "3", text: "приставочно-суффиксальный", correct: true },
+      { id: "4", text: "бессуффиксный", correct: false },
+      { id: "5", text: "сложение", correct: false },
+    ],
+    explanation: "Слово «бездорожье» образовано от существительного «дорога» одновременным присоединением приставки БЕЗ- и суффикса -j- (бездорожье — место, где нет дороги). Нет промежуточного слова «бездорога», поэтому способ приставочно-суффиксальный, а не последовательное добавление морфем."
+  },
+
+  // 15 — найди лишнее (зелень)
+  {
+    block: "Блок Б · Словообразование",
+    type: "single",
+    title: "Найди <b>ЛИШНЕЕ</b> слово — то, которое образовано не таким способом, как остальные.",
+    options: [
+      { id: "А", text: "синева", correct: false },
+      { id: "Б", text: "белизна", correct: false },
+      { id: "В", text: "зелень", correct: true },
+      { id: "Г", text: "глубина", correct: false },
+      { id: "Д", text: "храбрость", correct: false },
+    ],
+    explanation: "Лишнее — В (зелень). Слова синева, белизна, глубина, храбрость образованы суффиксальным способом от прилагательных (синий + -ЕВ-, белый + -ИЗН-, глубокий + -ИН-, храбрый + -ОСТЬ). А слово «зелень» образовано от прилагательного «зелёный» бессуффиксным способом — основа без добавления суффикса."
+  },
+
+  // 16 — найди лишнее (переписывание)
+  {
+    block: "Блок Б · Словообразование",
+    type: "single",
+    title: "Найди <b>ЛИШНЕЕ</b> слово.",
+    options: [
+      { id: "А", text: "пришкольный", correct: false },
+      { id: "Б", text: "подоконник", correct: false },
+      { id: "В", text: "переписывание", correct: true },
+      { id: "Г", text: "приморский", correct: false },
+      { id: "Д", text: "безветренный", correct: false },
+    ],
+    explanation: "Лишнее — В (переписывание). Слова пришкольный, подоконник, приморский, безветренный образованы приставочно-суффиксальным способом (от существительных школа, окно, море, ветер с одновременным добавлением приставки и суффикса). А слово «переписывание» образовано суффиксальным способом от глагола «переписывать» при помощи суффикса -НИЙ-: приставка ПЕРЕ- уже была в производящем глаголе, новая приставка не добавлялась."
+  }
+];
+
+/* ===================== СОСТОЯНИЕ ===================== */
+
+const state = TASKS.map(() => ({
+  answered: false,
+  // для chain: order — текущий массив слов в слотах
+  // для multi/single: selected — массив выбранных id
+  // для fill: values — массив букв
+  // для chain.subQuestion: subSelected — id выбранного варианта
+}));
+
+let testChecked = false;
+
+/* ===================== РЕНДЕРИНГ ===================== */
+
+const root = document.getElementById('tasksRoot');
+let lastBlock = "";
+
+TASKS.forEach((task, idx) => {
+  if (task.block !== lastBlock) {
+    const bh = document.createElement('div');
+    bh.className = 'block-header';
+    const parts = task.block.split(" · ");
+    bh.innerHTML = `<span class="num">${parts[0]}</span><span class="title">${parts[1]}</span>`;
+    root.appendChild(bh);
+    lastBlock = task.block;
+  }
+
+  const card = document.createElement('div');
+  card.className = 'task';
+  card.id = `task-${idx}`;
+  card.innerHTML = `
+    <div class="task-head">
+      <div class="task-num">${String(idx + 1).padStart(2, '0')}</div>
+      <div class="task-title">Задание ${idx + 1}</div>
+    </div>
+    <div class="task-prompt">${task.title}</div>
+    <div class="task-body" id="body-${idx}"></div>
+  `;
+  root.appendChild(card);
+
+  const body = card.querySelector(`#body-${idx}`);
+
+  if (task.type === "multi") renderMulti(body, idx, task);
+  else if (task.type === "single") renderSingle(body, idx, task);
+  else if (task.type === "fill") renderFill(body, idx, task);
+  else if (task.type === "chain") renderChain(body, idx, task);
+});
+
+function renderMulti(body, idx, task) {
+  const wrap = document.createElement('div');
+  wrap.className = 'options';
+  task.options.forEach(opt => {
+    const lab = document.createElement('label');
+    lab.className = 'opt';
+    lab.dataset.optId = opt.id;
+    lab.innerHTML = `<input type="checkbox" name="t${idx}" value="${opt.id}"><span class="opt-label"><b>${opt.id})</b> ${opt.text}</span><span class="opt-mark"></span>`;
+    wrap.appendChild(lab);
+  });
+  body.appendChild(wrap);
+}
+
+function renderSingle(body, idx, task) {
+  const wrap = document.createElement('div');
+  wrap.className = 'options';
+  task.options.forEach(opt => {
+    const lab = document.createElement('label');
+    lab.className = 'opt';
+    lab.dataset.optId = opt.id;
+    lab.innerHTML = `<input type="radio" name="t${idx}" value="${opt.id}"><span class="opt-label"><b>${opt.id})</b> ${opt.text}</span><span class="opt-mark"></span>`;
+    wrap.appendChild(lab);
+  });
+  body.appendChild(wrap);
+}
+
+function renderFill(body, idx, task) {
+  const wrap = document.createElement('div');
+  wrap.className = 'cells';
+  task.cells.forEach((cell, ci) => {
+    const div = document.createElement('div');
+    div.className = 'cell';
+    div.dataset.cellIdx = ci;
+    const wordHtml = cell.word.replace('__', '<b>__</b>');
+    div.innerHTML = `
+      <div class="cell-word">${wordHtml}</div>
+      <select data-idx="${idx}" data-ci="${ci}">
+        <option value="">—</option>
+        ${task.options.map(o => `<option value="${o}">${o}</option>`).join('')}
+      </select>
+      <span class="cell-correct-answer"></span>
+    `;
+    wrap.appendChild(div);
+  });
+  body.appendChild(wrap);
+}
+
+function renderChain(body, idx, task) {
+  // Перемешиваем pool детерминированно от idx
+  const shuffled = shuffle(task.pool.slice(), idx);
+
+  // Контейнер: pool + slots + subQuestion
+  const wrap = document.createElement('div');
+  wrap.className = 'chain-wrap';
+  wrap.innerHTML = `
+    <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Слова</div>
+    <div class="chain-pool" id="chain-pool-${idx}"></div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Цепочка: от простого к сложному</div>
+    <div class="chain-slots" id="chain-slots-${idx}"></div>
+    <div class="sub-q">
+      <div class="sub-q-label">${task.subQuestion.title}</div>
+      <div class="options" id="subq-${idx}"></div>
+    </div>
+  `;
+  body.appendChild(wrap);
+
+  const pool = wrap.querySelector(`#chain-pool-${idx}`);
+  shuffled.forEach(word => {
+    const chip = document.createElement('div');
+    chip.className = 'chip';
+    chip.draggable = true;
+    chip.dataset.word = word;
+    chip.dataset.taskIdx = idx;
+    chip.textContent = word;
+    pool.appendChild(chip);
+  });
+
+  const slotsContainer = wrap.querySelector(`#chain-slots-${idx}`);
+  for (let i = 0; i < task.pool.length; i++) {
+    const slot = document.createElement('div');
+    slot.className = 'chain-slot';
+    slot.dataset.taskIdx = idx;
+    slot.dataset.slotIdx = i;
+    const arrow = i === 0 ? '' : '<span class="chip-arrow">→</span>';
+    slot.innerHTML = `${arrow}<div class="chain-slot-num">${i + 1}</div><div class="chain-slot-content"></div><span class="correct-hint"></span>`;
+    slotsContainer.appendChild(slot);
+  }
+
+  // sub-question options
+  const subqWrap = wrap.querySelector(`#subq-${idx}`);
+  task.subQuestion.options.forEach(opt => {
+    const lab = document.createElement('label');
+    lab.className = 'opt';
+    lab.dataset.optId = opt.id;
+    lab.innerHTML = `<input type="radio" name="subq${idx}" value="${opt.id}"><span class="opt-label">${opt.text}</span><span class="opt-mark"></span>`;
+    subqWrap.appendChild(lab);
+  });
+
+  setupChainDnD(idx, task);
+}
+
+function shuffle(arr, seed) {
+  // Простой детерминированный шаффл, чтобы при перезагрузке порядок не менялся
+  let s = seed * 9301 + 49297;
+  for (let i = arr.length - 1; i > 0; i--) {
+    s = (s * 9301 + 49297) % 233280;
+    const j = Math.floor((s / 233280) * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+/* ===================== DRAG&DROP ДЛЯ ЦЕПОЧКИ ===================== */
+
+function setupChainDnD(idx, task) {
+  const allChips = () => document.querySelectorAll(`.chip[data-task-idx="${idx}"]`);
+  const allTargets = () => [
+    document.getElementById(`chain-pool-${idx}`),
+    ...document.querySelectorAll(`.chain-slot[data-task-idx="${idx}"]`)
+  ];
+
+  function attachChip(chip) {
+    chip.addEventListener('dragstart', e => {
+      if (testChecked) return;
+      chip.classList.add('dragging');
+      e.dataTransfer.setData('text/plain', chip.dataset.word);
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    chip.addEventListener('dragend', () => chip.classList.remove('dragging'));
+
+    chip.addEventListener('click', () => {
+      if (testChecked) return;
+      // Tap-to-place: переместить в первый пустой слот; если все полны — в пул
+      const slots = document.querySelectorAll(`.chain-slot[data-task-idx="${idx}"]`);
+      const parent = chip.parentElement;
+      if (parent.classList.contains('chain-slot')) {
+        // из слота → в пул
+        document.getElementById(`chain-pool-${idx}`).appendChild(chip);
+        parent.classList.remove('filled');
+      } else {
+        // из пула → в первый пустой слот
+        for (const slot of slots) {
+          const inner = slot.querySelector('.chain-slot-content');
+          if (!inner.querySelector('.chip')) {
+            inner.appendChild(chip);
+            slot.classList.add('filled');
+            break;
+          }
+        }
+      }
+    });
+  }
+
+  allChips().forEach(attachChip);
+
+  allTargets().forEach(target => {
+    target.addEventListener('dragover', e => {
+      if (testChecked) return;
+      e.preventDefault();
+      if (target.classList.contains('chain-slot')) target.classList.add('drag-over');
+    });
+    target.addEventListener('dragleave', () => target.classList.remove('drag-over'));
+    target.addEventListener('drop', e => {
+      if (testChecked) return;
+      e.preventDefault();
+      target.classList.remove('drag-over');
+      const word = e.dataTransfer.getData('text/plain');
+      const chip = document.querySelector(`.chip[data-task-idx="${idx}"][data-word="${word}"]`);
+      if (!chip) return;
+
+      // Если цель — слот, и в нём уже есть chip, переместить старый chip в пул
+      if (target.classList.contains('chain-slot')) {
+        const inner = target.querySelector('.chain-slot-content');
+        const existing = inner.querySelector('.chip');
+        if (existing && existing !== chip) {
+          document.getElementById(`chain-pool-${idx}`).appendChild(existing);
+        }
+        // Удалить chip из старого слота (если оттуда), пометить старый как не filled
+        const oldParent = chip.parentElement;
+        if (oldParent.classList.contains('chain-slot-content')) {
+          oldParent.parentElement.classList.remove('filled');
+        }
+        inner.appendChild(chip);
+        target.classList.add('filled');
+      } else {
+        // Цель — пул
+        const oldParent = chip.parentElement;
+        if (oldParent.classList.contains('chain-slot-content')) {
+          oldParent.parentElement.classList.remove('filled');
+        }
+        target.appendChild(chip);
+      }
+    });
+  });
+}
+
+/* ===================== ПОДСЧЁТ ПРОГРЕССА ===================== */
+
+function isTaskFilled(idx) {
+  const task = TASKS[idx];
+  if (task.type === "multi" || task.type === "single") {
+    return document.querySelectorAll(`input[name="t${idx}"]:checked`).length > 0;
+  }
+  if (task.type === "fill") {
+    const sels = document.querySelectorAll(`select[data-idx="${idx}"]`);
+    return [...sels].every(s => s.value !== "");
+  }
+  if (task.type === "chain") {
+    const slots = document.querySelectorAll(`.chain-slot[data-task-idx="${idx}"]`);
+    const allFilled = [...slots].every(s => s.querySelector('.chip'));
+    const subSel = document.querySelectorAll(`input[name="subq${idx}"]:checked`).length > 0;
+    return allFilled && subSel;
+  }
+  return false;
+}
+
+function updateProgress() {
+  const done = TASKS.filter((_, i) => isTaskFilled(i)).length;
+  document.getElementById('progressFill').style.width = `${(done / TASKS.length) * 100}%`;
+  document.getElementById('progressScore').textContent = `${done} / ${TASKS.length}`;
+  // Также обновляем warning
+  const warn = document.getElementById('checkWarning');
+  if (done === TASKS.length) {
+    warn.textContent = 'Все задания заполнены — можно проверять.';
+    warn.classList.remove('error');
+  } else {
+    warn.textContent = `Заполни все задания (${done} из ${TASKS.length}), прежде чем отправлять.`;
+    warn.classList.remove('error');
+  }
+}
+
+// Слушаем все изменения
+document.addEventListener('change', e => {
+  if (testChecked) return;
+  updateProgress();
+});
+// И клики (для chain — drag/click тоже триггерят обновление)
+document.addEventListener('click', e => {
+  if (testChecked) return;
+  setTimeout(updateProgress, 50);
+});
+document.addEventListener('drop', e => {
+  if (testChecked) return;
+  setTimeout(updateProgress, 50);
+});
+
+/* ===================== ПРОВЕРКА ===================== */
+
+document.getElementById('checkFinalBtn').addEventListener('click', () => {
+  const allFilled = TASKS.every((_, i) => isTaskFilled(i));
+  if (!allFilled) {
+    const warn = document.getElementById('checkWarning');
+    warn.textContent = 'Сначала заполни все задания.';
+    warn.classList.add('error');
+    // Прокрутить к первому незаполненному
+    for (let i = 0; i < TASKS.length; i++) {
+      if (!isTaskFilled(i)) {
+        document.getElementById(`task-${i}`).scrollIntoView({ behavior: 'smooth', block: 'center' });
+        break;
+      }
+    }
+    return;
+  }
+  checkAllTasks();
+});
+
+function checkAllTasks() {
+  testChecked = true;
+  let correctCount = 0;
+
+  TASKS.forEach((task, idx) => {
+    const result = checkSingleTask(idx, task);
+    if (result.correct) correctCount++;
+    state[idx].correct = result.correct;
+    state[idx].userAnswer = result.userAnswer;
+    showFeedback(idx, task, result.correct);
+  });
+
+  // Скрыть кнопку проверки, показать финал
+  document.getElementById('bigCheckWrap').style.display = 'none';
+  showFinal(correctCount);
+}
+
+function checkSingleTask(idx, task) {
+  if (task.type === "multi") {
+    const selected = [...document.querySelectorAll(`input[name="t${idx}"]:checked`)].map(i => i.value);
+    const correctIds = task.options.filter(o => o.correct).map(o => o.id);
+    const isCorrect = selected.length === correctIds.length && correctIds.every(c => selected.includes(c));
+    // Подсветка
+    task.options.forEach(o => {
+      const lab = document.querySelector(`#task-${idx} .opt[data-opt-id="${o.id}"]`);
+      lab.classList.add('locked');
+      lab.querySelector('input').disabled = true;
+      const mark = lab.querySelector('.opt-mark');
+      if (o.correct) {
+        lab.classList.add('correct-shown');
+        mark.textContent = selected.includes(o.id) ? '✓' : '← правильный';
+      } else if (selected.includes(o.id)) {
+        lab.classList.add('wrong-shown');
+        mark.textContent = '✗';
+      }
+    });
+    return { correct: isCorrect, userAnswer: selected.sort().join(', ') || '(пусто)' };
+  }
+
+  if (task.type === "single") {
+    const sel = document.querySelector(`input[name="t${idx}"]:checked`);
+    const correctOpt = task.options.find(o => o.correct);
+    const userVal = sel ? sel.value : null;
+    const isCorrect = userVal === correctOpt.id;
+    task.options.forEach(o => {
+      const lab = document.querySelector(`#task-${idx} .opt[data-opt-id="${o.id}"]`);
+      lab.classList.add('locked');
+      lab.querySelector('input').disabled = true;
+      const mark = lab.querySelector('.opt-mark');
+      if (o.correct) {
+        lab.classList.add('correct-shown');
+        mark.textContent = o.id === userVal ? '✓' : '← правильный';
+      } else if (o.id === userVal) {
+        lab.classList.add('wrong-shown');
+        mark.textContent = '✗';
+      }
+    });
+    return { correct: isCorrect, userAnswer: userVal || '(пусто)' };
+  }
+
+  if (task.type === "fill") {
+    const sels = document.querySelectorAll(`select[data-idx="${idx}"]`);
+    const answers = [...sels].map(s => s.value);
+    const isCorrect = task.cells.every((c, ci) => c.correct === answers[ci]);
+    sels.forEach((s, ci) => {
+      s.disabled = true;
+      const cell = s.closest('.cell');
+      const corrSpan = cell.querySelector('.cell-correct-answer');
+      if (s.value === task.cells[ci].correct) {
+        cell.classList.add('correct-shown');
+      } else {
+        cell.classList.add('wrong-shown');
+        corrSpan.textContent = `→ ${task.cells[ci].correct}`;
+      }
+    });
+    const userAns = task.cells.map((c, ci) => c.word.replace('__', answers[ci] || '?')).join(' · ');
+    return { correct: isCorrect, userAnswer: userAns };
+  }
+
+  if (task.type === "chain") {
+    const slots = document.querySelectorAll(`.chain-slot[data-task-idx="${idx}"]`);
+    const order = [...slots].map(s => {
+      const chip = s.querySelector('.chip');
+      return chip ? chip.dataset.word : null;
+    });
+    const chainCorrect = order.every((w, i) => w === task.correctOrder[i]);
+
+    const subSel = document.querySelector(`input[name="subq${idx}"]:checked`);
+    const subCorrectId = task.subQuestion.options.find(o => o.correct).id;
+    const subCorrect = subSel && subSel.value === subCorrectId;
+
+    const isCorrect = chainCorrect && subCorrect;
+
+    // Подсветка слотов
+    slots.forEach((slot, i) => {
+      const chip = slot.querySelector('.chip');
+      if (chip) chip.classList.add('locked');
+      if (chip && chip.dataset.word === task.correctOrder[i]) {
+        slot.classList.add('correct-shown');
+      } else {
+        slot.classList.add('wrong-shown');
+        const hint = slot.querySelector('.correct-hint');
+        hint.textContent = `→ ${task.correctOrder[i]}`;
+      }
+    });
+    // Заблокировать chips, чтобы нельзя было двигать
+    document.querySelectorAll(`.chip[data-task-idx="${idx}"]`).forEach(c => {
+      c.draggable = false; c.classList.add('locked');
+    });
+    // Подсветка sub-question
+    task.subQuestion.options.forEach(o => {
+      const lab = document.querySelector(`#subq-${idx} .opt[data-opt-id="${o.id}"]`);
+      lab.classList.add('locked');
+      lab.querySelector('input').disabled = true;
+      const mark = lab.querySelector('.opt-mark');
+      if (o.correct) {
+        lab.classList.add('correct-shown');
+        mark.textContent = (subSel && o.id === subSel.value) ? '✓' : '← правильный';
+      } else if (subSel && o.id === subSel.value) {
+        lab.classList.add('wrong-shown');
+        mark.textContent = '✗';
+      }
+    });
+
+    const userAns = `[${order.join(' → ')}] / способ: ${subSel ? task.subQuestion.options.find(o => o.id === subSel.value).text : '(пусто)'}`;
+    return { correct: isCorrect, userAnswer: userAns };
+  }
+
+  return { correct: false, userAnswer: '(не определено)' };
+}
+
+function showFeedback(idx, task, isCorrect) {
+  const card = document.getElementById(`task-${idx}`);
+  const fb = document.createElement('div');
+  fb.style.marginTop = '16px';
+  fb.style.padding = '14px 16px';
+  fb.style.borderLeft = `4px solid ${isCorrect ? 'var(--correct)' : 'var(--wrong)'}`;
+  fb.style.background = isCorrect ? 'rgba(45,106,79,0.07)' : 'rgba(155,34,38,0.06)';
+  fb.innerHTML = `
+    <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;font-weight:700;color:${isCorrect ? 'var(--correct)' : 'var(--wrong)'};margin-bottom:8px;">
+      ${isCorrect ? '✓ Верно' : '✗ Есть ошибки'}
+    </div>
+    <div style="font-size:15px;line-height:1.55;">${task.explanation}</div>
+  `;
+  card.appendChild(fb);
+}
+
+/* ===================== ФИНАЛ + ТЕЛЕГРАМ ===================== */
+
+function showFinal(correctCount) {
+  const card = document.getElementById('finalCard');
+  card.classList.add('shown');
+  document.getElementById('finalNum').textContent = correctCount;
+
+  const pct = correctCount / TASKS.length;
+  let grade;
+  if (pct >= 0.93) grade = "Превосходно. Тема освоена.";
+  else if (pct >= 0.8) grade = "Хороший результат. Есть мелкие шероховатости.";
+  else if (pct >= 0.6) grade = "Неплохо, но стоит повторить разобранные правила.";
+  else if (pct >= 0.4) grade = "Тема в работе. Внимательно прочти разборы.";
+  else grade = "Нужно вернуться к теории и разобрать ошибки с учителем.";
+  document.getElementById('finalGrade').textContent = grade;
+
+  // Прокрутка к финалу
+  setTimeout(() => card.scrollIntoView({ behavior: 'smooth' }), 200);
+}
+
+// Telegram
+const TG_BOT_TOKEN = '8899061277:AAHApQidyerA2DKTEG64c8CC8F7u1aMsOrs';
+const TG_CHAT_ID   = '262004044';
+
+function buildMessage(name) {
+  const correct = state.filter(s => s.correct).length;
+  const total = TASKS.length;
+  const now = new Date();
+  const date = now.toLocaleDateString('ru-RU');
+  const time = now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+
+  let msg = `📝 Тренажёр «Суффиксы и словообразование»\n`;
+  msg += `Ученик: ${name}\n`;
+  msg += `Результат: ${correct} / ${total}\n`;
+  msg += `Дата: ${date} ${time}\n`;
+  msg += `\n— — — — — — — — —\n\n`;
+
+  state.forEach((s, i) => {
+    const mark = s.correct ? '✅' : '❌';
+    msg += `${mark} З.${i + 1}: ${s.userAnswer}\n`;
+  });
+
+  msg += `\n— — — — — — — — —\n`;
+  const wrongList = state.map((s, i) => s.correct ? null : i + 1).filter(Boolean);
+  if (wrongList.length) {
+    msg += `Ошибки в заданиях: ${wrongList.join(', ')}`;
+  } else {
+    msg += `Без ошибок 🎉`;
+  }
+  return msg;
+}
+
+async function sendToTelegram(text) {
+  const url = `https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`;
+  const resp = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      chat_id: TG_CHAT_ID,
+      text: text,
+      disable_web_page_preview: true
+    })
+  });
+  const data = await resp.json();
+  if (!data.ok) throw new Error(data.description || 'Ошибка отправки');
+  return data;
+}
+
+document.getElementById('sendBtn').addEventListener('click', async () => {
+  const nameInputTop = document.getElementById('studentNameTop');
+  const nameInputBottom = document.getElementById('studentName');
+  const btn = document.getElementById('sendBtn');
+  const hint = document.querySelector('.send-hint');
+  // Берём имя из любого заполненного поля (приоритет — нижнее, если оно правлено отдельно)
+  const name = (nameInputBottom.value.trim() || nameInputTop.value.trim());
+
+  if (!name) {
+    nameInputBottom.focus();
+    nameInputBottom.style.outline = '2px solid var(--accent)';
+    hint.textContent = 'Сначала впиши имя и фамилию.';
+    hint.style.color = 'var(--accent)';
+    return;
+  }
+
+  btn.disabled = true;
+  const originalText = btn.textContent;
+  btn.textContent = 'Отправляю...';
+  hint.style.color = 'var(--muted)';
+  hint.textContent = 'Соединение с Telegram...';
+
+  try {
+    const msg = buildMessage(name);
+    await sendToTelegram(msg);
+    btn.textContent = '✓ Отправлено учителю';
+    btn.style.background = 'var(--correct)';
+    btn.style.cursor = 'default';
+    nameInputBottom.disabled = true;
+    nameInputTop.disabled = true;
+    hint.style.color = 'var(--correct)';
+    hint.textContent = 'Готово. Результаты у учителя.';
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = originalText;
+    hint.style.color = 'var(--wrong)';
+    hint.textContent = 'Не удалось отправить. Проверь интернет и попробуй ещё раз.';
+  }
+});
+
+// Синхронизация: что введено сверху — копируется вниз (если нижнее ещё пусто)
+document.getElementById('studentNameTop').addEventListener('input', e => {
+  const bottom = document.getElementById('studentName');
+  if (!bottom.dataset.touched) {
+    bottom.value = e.target.value;
+  }
+});
+document.getElementById('studentName').addEventListener('input', e => {
+  e.target.dataset.touched = '1';
+});
+
+updateProgress();
+</script>
+</body>
+</html>
